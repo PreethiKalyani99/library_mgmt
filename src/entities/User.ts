@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm'
-import { Borrower } from './Borrower'
+import { BorrowedBook } from './BorrowedBook'
 
 @Entity('users')
 export class User {
@@ -18,6 +18,6 @@ export class User {
     @UpdateDateColumn({ name: 'updated_at' })
     updatedAt: Date
 
-    @OneToMany(() => Borrower, (borrower) => borrower.user)
-    borrowers: Borrower[]
+    @OneToMany(() => BorrowedBook, (borrowedBook) => borrowedBook.user)
+    borrowedBooks: BorrowedBook[]
 }
