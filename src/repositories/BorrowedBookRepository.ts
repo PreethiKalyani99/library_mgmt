@@ -10,13 +10,13 @@ export class BorrowedBookRepository {
     }
 
     async findAll(): Promise<BorrowedBook[]> {
-        return this.repository.find({ relations: ['books'] })
+        return this.repository.find({ relations: ['book'] })
     }
 
     async findById(id: string): Promise<BorrowedBook | null> {
         return this.repository.findOne({
             where: { id },
-            relations: ['books']
+            relations: ['book']
         })
     }
 

@@ -70,4 +70,16 @@ export class BorrowedBookService {
         return this.borrowedBookRepository.create(borrowedBookData)
     }
 
+    async updateBorrowedBook(id: string, returnDate: Date): Promise<BorrowedBook | null> {
+        const borrowedBook = await this.borrowedBookRepository.findById(id)
+        if (!borrowedBook) {
+            throw new Error('Borrowed book not found')
+        }
+        if(borrowedBook.borrow_date > returnDate) {
+            throw new Error('Return date cannot be earlier than borrow date')   
+        }
+        
+        borrowedBook.return_date = returnDate
+        return this.borrowedBookRepository.update(id, borrowedBook)
+    }
 } 
