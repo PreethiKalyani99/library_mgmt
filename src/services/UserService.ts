@@ -1,3 +1,4 @@
+import { hash } from "bcrypt"
 import { User } from "../entities/User"
 import { UserRepository } from "../repositories/UserRepository"
 
@@ -42,7 +43,11 @@ export class UserService {
         if (user) {
             throw new Error('User with this email already exists')
         }
+        if(!userData.password){
+            throw new Error('User password is required')
+        }
 
+        userData.password = await hash(userData.password, 10)
         return this.userRepository.create(userData)
     }
 }
