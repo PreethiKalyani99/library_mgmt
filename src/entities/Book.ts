@@ -1,5 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany, DeleteDateColumn } from 'typeorm'
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany, DeleteDateColumn, ManyToOne, JoinColumn } from 'typeorm'
 import { BorrowedBook } from './BorrowedBook'
+import { Author } from './Author'
 
 @Entity('books')
 export class Book {
@@ -28,8 +29,12 @@ export class Book {
   createdAt: Date
 
   @UpdateDateColumn({ name: 'updated_at' })
-  updatedAt: Date
+  updatedAt: Date 
 
   @OneToMany(() => BorrowedBook, (borrowed_book) => borrowed_book.book)
   borrowedBooks: BorrowedBook[]
+
+  @ManyToOne(() => Author, (author) => author.books, {onDelete: 'CASCADE'})
+  @JoinColumn({ name: 'author_id' })
+  author_info: Author
 } 

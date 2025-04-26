@@ -1,6 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm'
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm'
+import { Book } from './Book'
 
-@Entity('authors')
+@Entity('authors') 
 export class Author {
     @PrimaryGeneratedColumn('uuid')
     id: string
@@ -16,4 +17,7 @@ export class Author {
 
     @UpdateDateColumn({ name: 'updated_at' })
     updatedAt: Date
+
+    @OneToMany(() => Book, (book) => book.author_info, { cascade: true })
+    books: Book[]
 }
