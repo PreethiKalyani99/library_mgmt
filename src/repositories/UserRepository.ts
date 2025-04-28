@@ -10,11 +10,18 @@ export class UserRepository {
     }
 
     async findAll(): Promise<User[]> {
-        return this.repository.find()
+        return this.repository
+        .createQueryBuilder('user')
+        .select(['user.id', 'user.email'])
+        .getMany()
     }
 
     async findById(id: string): Promise<User | null> {
-        return this.repository.findOneBy({ id })
+        return this.repository
+        .createQueryBuilder('user')
+        .select(['user.id', 'user.email'])
+        .where('user.id = :id', { id })
+        .getOne()
     }
 
     async findByEmail(email: string): Promise<User | null> {
