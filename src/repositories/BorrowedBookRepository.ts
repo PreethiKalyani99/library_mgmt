@@ -10,14 +10,22 @@ export class BorrowedBookRepository {
     }
 
     async findAll(): Promise<BorrowedBook[]> {
-        return this.repository.find({ relations: ['book'] })
+        return this.repository 
+        .createQueryBuilder('borrowedBook')
+        .leftJoinAndSelect('borrowedBook.book', 'book')
+        .leftJoin('borrowedBook.user', 'user')
+        .addSelect(['user.id', 'user.email'])
+        .getMany()
     }
 
     async findById(id: string): Promise<BorrowedBook | null> {
-        return this.repository.findOne({
-            where: { id },
-            relations: ['book']
-        })
+        return this.repository
+        .createQueryBuilder('borrowedBook')
+        .leftJoinAndSelect('borrowedBook.book', 'book')
+        .leftJoin('borrowedBook.user', 'user')
+        .addSelect(['user.id', 'user.email'])
+        .where('borrowedBook.id = :id', { id })
+        .getOne()
     }
 
     async create(borrowedBookData: Partial<BorrowedBook>): Promise<BorrowedBook> {
