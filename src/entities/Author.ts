@@ -18,6 +18,6 @@ export class Author {
     @UpdateDateColumn({ name: 'updated_at' })
     updatedAt: Date
 
-    @OneToMany(() => Book, (book) => book.author_info, { cascade: true })
+    @OneToMany(() => Book, (book) => book.author, { cascade: true })
     books: Book[]
 }
