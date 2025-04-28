@@ -1,11 +1,11 @@
-import { Author } from "../entities/Author"
+import { Author } from "../entities/Author" 
 import { AuthorRepository } from "../repositories/AuthorRepository"
 
 export class AuthorService {
     private authorRepository: AuthorRepository
 
-    constructor() {
-        this.authorRepository = new AuthorRepository()
+    constructor(authorRepository?: AuthorRepository) {
+        this.authorRepository = authorRepository ?? new AuthorRepository()
     }
 
     async getAllAuthors(): Promise<Author[]> {
@@ -16,10 +16,12 @@ export class AuthorService {
         return this.authorRepository.findById(id)
     }
 
-    async createAuthor(authorData: Partial<Author>): Promise<Author> {
-        if (!authorData.name) {
-            throw new Error('Author name is required')
+    async createAuthor(authorData: Author): Promise<Author> {
+        const author = await this.authorRepository.findByName(authorData.name)
+        if(author){
+            throw new Error("Author already exists")
         }
+        
         return this.authorRepository.create(authorData)
     }
 
