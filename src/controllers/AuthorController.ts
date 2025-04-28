@@ -4,8 +4,8 @@ import { AuthorService } from "../services/AuthorService"
 export class AuthorController {
     private authorService: AuthorService
 
-    constructor() {
-        this.authorService = new AuthorService()
+    constructor(authorService?: AuthorService) {
+        this.authorService = authorService ?? new AuthorService()
     }
 
     async getAllAuthors(req: Request, res: Response): Promise<void> {
