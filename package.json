@@ -22,7 +22,8 @@
     "express": "^4.18.2",
     "pg": "^8.11.3",
     "reflect-metadata": "^0.1.13",
-    "typeorm": "^0.3.17"
+    "typeorm": "^0.3.17",
+    "joi": "^17.13.3"
   },
   "devDependencies": {
     "@jest/globals": "^29.7.0",
