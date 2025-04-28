@@ -17,6 +17,12 @@ export class AuthorRepository {
         return this.repository.findOneBy({ id })
     }
 
+    async findByName(name: string): Promise<Author | null> {
+        return this.repository.createQueryBuilder('author')
+        .where('LOWER(author.name) = LOWER(:name)', { name })
+        .getOne()
+    }
+
     async create(authorData: Partial<Author>): Promise<Author> {
         const author = this.repository.create(authorData)
         return this.repository.save(author)
