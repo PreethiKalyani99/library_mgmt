@@ -4,16 +4,30 @@ import { BorrowedBookService } from '../services/BorrowedBookService'
 export class BorrowedBookController {
     private borrowedBookService: BorrowedBookService
 
-    constructor() {
-        this.borrowedBookService = new BorrowedBookService()
+    constructor(borrowedBookService?: BorrowedBookService) {
+        this.borrowedBookService = borrowedBookService ?? new BorrowedBookService()
     }
 
     async getAllBorrowedBooks(req: Request, res: Response): Promise<void> {
         try {
-            const borrowedBooks = await this.borrowedBookService.getAllBorrowedBookss()
+            const borrowedBooks = await this.borrowedBookService.getAllBorrowedBooks()
             res.json(borrowedBooks)
         } catch (error) {
             res.status(500).json({ message: 'Error fetching borrowedBooks', error: (error as Error).message })
+        }
+    }
+
+    async getBorrowedBookById(req: Request, res: Response): Promise<void> {
+        try {
+            const { id } = req.params
+            const borrowedBook = await this.borrowedBookService.getBorrowedBookById(id)
+            if (!borrowedBook) {
+                res.status(404).json({ message: 'Borrowed Book not found' })
+                return
+            }
+            res.json(borrowedBook)
+        } catch (error) {
+            res.status(500).json({ message: 'Error fetching borrowedBook', error: (error as Error).message })
         }
     }
     
