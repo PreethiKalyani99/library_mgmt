@@ -10,9 +10,6 @@ export class Book {
   @Column()
   title: string
 
-  @Column()
-  author: string
-
   @Column({ type: 'text', nullable: true })
   description: string
 
@@ -36,5 +33,5 @@ export class Book {
 
   @ManyToOne(() => Author, (author) => author.books, {onDelete: 'CASCADE'})
   @JoinColumn({ name: 'author_id' })
-  author_info: Author
+  author: Author
 } 
