@@ -20,13 +20,13 @@ export class BorrowedBookService {
     private userRepository: UserRepository
     private bookRepository: BookRepository
 
-    constructor() {
-        this.borrowedBookRepository = new BorrowedBookRepository()
-        this.userRepository = new UserRepository()
-        this.bookRepository = new BookRepository()
+    constructor(borrowedBookRepository?: BorrowedBookRepository, userRepository?: UserRepository, bookRepository?: BookRepository) {
+        this.borrowedBookRepository =  borrowedBookRepository ?? new BorrowedBookRepository()
+        this.userRepository = userRepository ?? new UserRepository()
+        this.bookRepository = bookRepository ?? new BookRepository()
     }
 
-    async getAllBorrowedBookss(): Promise<BorrowedBook[]> {
+    async getAllBorrowedBooks(): Promise<BorrowedBook[]> {
         return this.borrowedBookRepository.findAll()
     }
 
@@ -48,10 +48,7 @@ export class BorrowedBookService {
         return this.bookRepository.findByTitle(title)
     }
 
-    async createBorrowedBook(borrowedBookData: Partial<BorrowedBook>): Promise<BorrowedBook | null> {
-        if(!borrowedBookData.user || ( !borrowedBookData.user.id && !borrowedBookData.user.email )) throw new Error("Either user ID or Email is required")
-        if(!borrowedBookData.book || ( !borrowedBookData.book.id && !borrowedBookData.book.title )) throw new Error("Either book ID or Title is required")
-
+    async createBorrowedBook(borrowedBookData: BorrowedBook): Promise<BorrowedBook | null> {
         const user = await this.findUserBy({ id: borrowedBookData.user.id, email: borrowedBookData.user.email })
 
         if (!user) {
