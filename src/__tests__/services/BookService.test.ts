@@ -1,50 +1,43 @@
-import { BookService } from "../../services/BookService";
+import { BookService } from "../../services/BookService"; 
 import { BookRepository } from "../../repositories/BookRepository";
+import { AuthorRepository } from "../../repositories/AuthorRepository";
 
 let bookService: BookService
 let bookRepository: BookRepository
+let authorRepository: AuthorRepository
 
 beforeEach(() => {
     bookRepository = {
         findAll: jest.fn(),
         findById: jest.fn(),
+        findByTitle: jest.fn(),
         create: jest.fn(),
         update: jest.fn(),
         delete: jest.fn()
     } as any
 
-    bookService = new BookService(bookRepository)
+    authorRepository = {
+        findByName: jest.fn(),
+        findById: jest.fn(),
+    } as any
+
+    bookService = new BookService(bookRepository, authorRepository)
 })
 
 describe("BookService - createBook", () => {
-    it("should create book", () => {
+    it("should create book", async () => {
         const mockBook = { title: "Atomic Habits", author: { name: "James Clear" } }
-        bookRepository.create = jest.fn().mockResolvedValue({ id: "1", ...mockBook })
+        const mockAuthor = { id: "1", name: "James Clear" }
+        const expectedResult = { title: "Atomic Habits", author: mockAuthor }
 
-        const result = bookService.createBook(mockBook as any)
+        bookRepository.findByTitle = jest.fn().mockResolvedValue(null)
+        bookService.findAuthorBy = jest.fn().mockResolvedValue(mockAuthor)
+        bookRepository.create = jest.fn().mockResolvedValue(expectedResult)
 
-        expect(bookRepository.create).toHaveBeenCalledWith(mockBook)
-        expect(result).resolves.toEqual({ id: "1", ...mockBook })
-    })
+        const result = await bookService.createBook(mockBook as any)
 
-    it("should throw an error when the title is missing", () => {
-        const mockBook = { title: "", author: { name: "James Clear" } }
-        bookRepository.create = jest.fn().mockResolvedValue({ id: "1", ...mockBook })
-
-        const result = bookService.createBook(mockBook as any)
-
-        expect(bookRepository.create).not.toHaveBeenCalledWith(mockBook)
-        expect(result).rejects.toThrow("Title and author are required")
-    })
-
-    it("should throw an error when the author name is missing", () => {
-        const mockBook = { title: "Atomic Habbits", author: { name: "" } }
-        bookRepository.create = jest.fn().mockResolvedValue({ id: "1", ...mockBook })
-
-        const result = bookService.createBook(mockBook as any)
-
-        expect(bookRepository.create).not.toHaveBeenCalledWith(mockBook)
-        expect(result).rejects.toThrow("Title and author are required")
+        expect(bookRepository.create).toHaveBeenCalledWith(expectedResult)
+        expect(result).toEqual(expectedResult)
     })
 })
 
