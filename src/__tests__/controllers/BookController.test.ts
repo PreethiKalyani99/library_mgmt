@@ -17,7 +17,7 @@ describe("BookController", () => {
         }
     })
 
-    it("should call createBook service method when creating a book", async () => {
+    it("should call create method when creating a book", async () => {
         const mockRequest = {
             body: {
                 title: "Atomic Habits",
