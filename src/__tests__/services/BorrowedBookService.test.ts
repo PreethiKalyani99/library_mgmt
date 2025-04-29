@@ -7,6 +7,9 @@ let borrowedBookService: BorrowedBookService
 let bookRepository: BookRepository
 let userRepository: UserRepository
 let borrowedBookRepository: BorrowedBookRepository
+let mockUser: any
+let mockBook: any
+let mockBorrowedBook: any
 
 beforeEach(() => {
     borrowedBookRepository = {
@@ -27,81 +30,66 @@ beforeEach(() => {
     } as any
 
     borrowedBookService = new BorrowedBookService(borrowedBookRepository, userRepository, bookRepository)
+
+    mockUser = { id: "1", email: "abc@gmail.com" }
+    mockBook = { id: "1", title: "Atomic Habits" }
+    mockBorrowedBook = { user: mockUser, book: mockBook, borrowedDate: new Date('2025-01-04') }
 })
 
-describe("BorrowedBookService", () => {
-    it('should create borrowed book', async () => {
-        const mockUser = { id: "1", email: "abc@gmail.com" }
-        const mockBook = { id: "1", title: "Atomic Habits" }
-        const mockBorrowedBook = { user: mockUser, book: mockBook, borrowedDate: new Date('2025-01-04') }
+test('should create a new borrowed book', async () => {
+    borrowedBookService.findUserBy = jest.fn().mockResolvedValue(mockUser)
+    borrowedBookService.findBookBy = jest.fn().mockResolvedValue(mockBook)
+    borrowedBookRepository.create = jest.fn().mockResolvedValue(mockBorrowedBook)
 
-        borrowedBookService.findUserBy = jest.fn().mockResolvedValue(mockUser)
-        borrowedBookService.findBookBy = jest.fn().mockResolvedValue(mockBook)
-        borrowedBookRepository.create = jest.fn().mockResolvedValue(mockBorrowedBook)
+    const result = await borrowedBookService.createBorrowedBook(mockBorrowedBook as any)
 
-        const result = await borrowedBookService.createBorrowedBook(mockBorrowedBook as any)
+    expect(borrowedBookRepository.create).toHaveBeenCalledWith(mockBorrowedBook)
+    expect(result).toEqual(mockBorrowedBook)
+})
 
-        expect(borrowedBookRepository.create).toHaveBeenCalledWith(mockBorrowedBook)
-        expect(result).toEqual(mockBorrowedBook)
-    })
+test('should throw error if user does not exist', async () => {
+    borrowedBookService.findUserBy = jest.fn().mockResolvedValue(null)
 
-    it('should throw error if user does not exist', async () => {
-        const mockUser = { id: "1", email: "abc@gmail.com" }
-        const mockBook = { id: "1", title: "Atomic Habits" }
-        const mockBorrowedBook = { user: mockUser, book: mockBook, borrowedDate: new Date('2025-01-04') }
+    expect(borrowedBookService.createBorrowedBook(mockBorrowedBook as any)).rejects.toThrow('User does not exist')
+    expect(borrowedBookService.findUserBy).toHaveBeenCalledWith({ id: mockUser.id, email: mockUser.email })
+})
 
-        borrowedBookService.findUserBy = jest.fn().mockResolvedValue(null)
+test('should throw error if book does not exist', async () => {
+    borrowedBookService.findUserBy = jest.fn().mockResolvedValue(mockUser)
+    borrowedBookService.findBookBy = jest.fn().mockResolvedValue(null)
 
-        expect(borrowedBookService.createBorrowedBook(mockBorrowedBook as any)).rejects.toThrow('User does not exist')
-        expect(borrowedBookService.findUserBy).toHaveBeenCalledWith({ id: mockUser.id, email: mockUser.email })
-    })
+    await expect(borrowedBookService.createBorrowedBook(mockBorrowedBook as any)).rejects.toThrow('Book does not exist')
+    expect(borrowedBookService.findBookBy).toHaveBeenCalledWith({ id: mockBook.id, title: mockBook.title })
+})
 
-    it('should throw error if book does not exist', async () => {
-        const mockUser = { id: "1", email: "abc@gmail.com" }
-        const mockBook = { id: "1", title: "Atomic Habits" }
-        const mockBorrowedBook = { user: mockUser, book: mockBook, borrowedDate: new Date('2025-01-04') }
+test('should return all borrowed books', async () => {
+    borrowedBookRepository.findAll = jest.fn().mockResolvedValue([mockBorrowedBook])
 
-        borrowedBookService.findUserBy = jest.fn().mockResolvedValue(mockUser)
-        borrowedBookService.findBookBy = jest.fn().mockResolvedValue(null)
+    const result = await borrowedBookService.getAllBorrowedBooks()
 
-        await expect(borrowedBookService.createBorrowedBook(mockBorrowedBook as any)).rejects.toThrow('Book does not exist')
-        expect(borrowedBookService.findBookBy).toHaveBeenCalledWith({ id: mockBook.id, title: mockBook.title })
-    })
-
-    it('should get all borrowed books', async () => {
-        const mockBorrowedBooks = [
-            { id: "1", user: { id: "1", email: "abc@gmail.com" }, book: { id: "1", title: "Atomic Habits" }, borrowedDate: new Date('2025-01-04') }
-        ]
-        borrowedBookRepository.findAll = jest.fn().mockResolvedValue(mockBorrowedBooks)
-
-        const result = await borrowedBookService.getAllBorrowedBooks()
-
-        expect(borrowedBookRepository.findAll).toHaveBeenCalledTimes(1)
-        expect(result).toEqual(mockBorrowedBooks)
-    })
+    expect(borrowedBookRepository.findAll).toHaveBeenCalledTimes(1)
+    expect(result).toEqual([mockBorrowedBook])
+})
 
 
-    it('should get borrowed book by ID', async () => {
-        const mockBorrowedBook = { id: "1", user: { id: "1", email: "abc@gmail.com" }, book: { id: "1", title: "Atomic Habits" }, borrowedDate: new Date('2025-01-04') }
-        borrowedBookRepository.findById = jest.fn().mockResolvedValue(mockBorrowedBook)
+test('should return borrowed book for a given ID', async () => {
+    borrowedBookRepository.findById = jest.fn().mockResolvedValue(mockBorrowedBook)
 
-        const result = await borrowedBookService.getBorrowedBookById("1")
+    const result = await borrowedBookService.getBorrowedBookById("1")
 
-        expect(borrowedBookRepository.findById).toHaveBeenCalledWith("1")
-        expect(result).toEqual(mockBorrowedBook)
-    })
+    expect(borrowedBookRepository.findById).toHaveBeenCalledWith("1")
+    expect(result).toEqual(mockBorrowedBook)
+})
 
-    it('should update borrowed book', async () => {
-        const mockBorrowedBook = { id: "1", user: { id: "1", email: "abc@gmail.com" }, book: { id: "1", title: "Atomic Habits" }, borrowedDate: new Date('2025-01-04') }
-        const return_date = new Date('2025-01-10')
+test('should update existing borrowed book', async () => {
+    const return_date = new Date('2025-01-10')
 
-        borrowedBookRepository.findById = jest.fn().mockResolvedValue(mockBorrowedBook)
-        borrowedBookRepository.update = jest.fn().mockResolvedValue({ ...mockBorrowedBook, return_date })
+    borrowedBookRepository.findById = jest.fn().mockResolvedValue(mockBorrowedBook)
+    borrowedBookRepository.update = jest.fn().mockResolvedValue({ ...mockBorrowedBook, return_date })
 
-        const result = await borrowedBookService.updateBorrowedBook("1", return_date)
+    const result = await borrowedBookService.updateBorrowedBook("1", return_date)
 
-        expect(borrowedBookRepository.findById).toHaveBeenCalledWith("1")
-        expect(borrowedBookRepository.update).toHaveBeenCalledWith("1", { ...mockBorrowedBook, return_date })
-        expect(result).toEqual({ ...mockBorrowedBook, return_date })
-    })
+    expect(borrowedBookRepository.findById).toHaveBeenCalledWith("1")
+    expect(borrowedBookRepository.update).toHaveBeenCalledWith("1", { ...mockBorrowedBook, return_date })
+    expect(result).toEqual({ ...mockBorrowedBook, return_date })
 })

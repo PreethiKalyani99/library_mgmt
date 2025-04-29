@@ -3,6 +3,7 @@ import { AuthorRepository } from "../../repositories/AuthorRepository";
 
 let authorService: AuthorService
 let authorRepository: AuthorRepository
+let mockAuthor: any
 
 beforeEach(() => {
     authorRepository = {
@@ -15,83 +16,74 @@ beforeEach(() => {
     } as any
 
     authorService = new AuthorService(authorRepository)
+
+    mockAuthor = { id: "1", name: "James Clear" }
 })
 
-describe("AuthorService", () => {
-    it("should create author", async () => {
-        const mockAuthor = { name: "James Clear" }
-        const expectedResult = { id: "1", name: "James Clear" }
+test("should create a new author", async () => {
+    const expectedResult = { id: "1", name: "James Clear" }
 
-        authorRepository.findByName = jest.fn().mockResolvedValue(null)
-        authorRepository.create = jest.fn().mockResolvedValue(expectedResult)
+    authorRepository.findByName = jest.fn().mockResolvedValue(null)
+    authorRepository.create = jest.fn().mockResolvedValue(expectedResult)
 
-        const result = await authorService.createAuthor(mockAuthor as any)
+    const result = await authorService.createAuthor(mockAuthor as any)
 
-        expect(authorRepository.create).toHaveBeenCalledWith(mockAuthor)
-        expect(result).toEqual(expectedResult)
-    })
+    expect(authorRepository.create).toHaveBeenCalledWith(mockAuthor)
+    expect(result).toEqual(expectedResult)
+})
 
-    it("should throw an error if author already exists", async () => {
-        const mockAuthor = { name: "James Clear" }
-        const existingAuthor = { id: "1", name: "James Clear" }
+test("should throw an error if author already exists", async () => {
+    const existingAuthor = { id: "1", name: "James Clear" }
 
-        authorRepository.findByName = jest.fn().mockResolvedValue(existingAuthor)
+    authorRepository.findByName = jest.fn().mockResolvedValue(existingAuthor)
 
-        await expect(authorService.createAuthor(mockAuthor as any)).rejects.toThrow("Author already exists")
-    })
+    await expect(authorService.createAuthor(mockAuthor as any)).rejects.toThrow("Author already exists")
+})
 
-    it('should update author', async () => {    
-        const mockAuthor = { id: "1", name: "James Clear" }
-        const updatedData = { name: "Spencer Johnson" }
-        const expectedResult = { id: "1", name: "Spencer Johnson" }
+test('should update existing author', async () => {
+    const updatedData = { name: "Spencer Johnson" }
+    const expectedResult = { id: "1", name: "Spencer Johnson" }
 
-        authorRepository.findById = jest.fn().mockResolvedValue(mockAuthor)
-        authorRepository.update = jest.fn().mockResolvedValue(expectedResult)
+    authorRepository.findById = jest.fn().mockResolvedValue(mockAuthor)
+    authorRepository.update = jest.fn().mockResolvedValue(expectedResult)
 
-        const result = await authorService.updateAuthor("1", updatedData)
+    const result = await authorService.updateAuthor("1", updatedData)
 
-        expect(authorRepository.update).toHaveBeenCalledWith("1", updatedData)
-        expect(result).toEqual(expectedResult)
-    })
+    expect(authorRepository.update).toHaveBeenCalledWith("1", updatedData)
+    expect(result).toEqual(expectedResult)
+})
 
-    it('should throw an error if author not found for update', async () => {    
-        const updatedData = { name: "Spencer Johnson" }
+test('should throw an error if author not found to update', async () => {
+    const updatedData = { name: "Spencer Johnson" }
 
-        authorRepository.findById = jest.fn().mockResolvedValue(null)
+    authorRepository.findById = jest.fn().mockResolvedValue(null)
 
-        await expect(authorService.updateAuthor("1", updatedData)).rejects.toThrow("Author not found")
-    })
+    await expect(authorService.updateAuthor("1", updatedData)).rejects.toThrow("Author not found")
+})
 
-    it('should delete author', async () => {    
-        const mockAuthor = { id: "1", name: "James Clear" }
+test('should successfully delete an existing author', async () => {
+    authorRepository.findById = jest.fn().mockResolvedValue(mockAuthor)
+    authorRepository.delete = jest.fn()
 
-        authorRepository.findById = jest.fn().mockResolvedValue(mockAuthor)
-        authorRepository.delete = jest.fn()
+    await authorService.deleteAuthor("1")
 
-        await authorService.deleteAuthor("1")
+    expect(authorRepository.delete).toHaveBeenCalledWith("1")
+})
 
-        expect(authorRepository.delete).toHaveBeenCalledWith("1")
-    })
+test('should return all authors', async () => {
+    authorRepository.findAll = jest.fn().mockResolvedValue([mockAuthor])
 
-    it('should get all authors', async () => {
-        const mockAuthors = [{ id: "1", name: "James Clear" }]
+    const result = await authorService.getAllAuthors()
 
-        authorRepository.findAll = jest.fn().mockResolvedValue(mockAuthors)
+    expect(authorRepository.findAll).toHaveBeenCalledTimes(1)
+    expect(result).toEqual([mockAuthor])
+})
 
-        const result = await authorService.getAllAuthors()
+test('should return author details for a given ID', async () => {
+    authorRepository.findById = jest.fn().mockResolvedValue(mockAuthor)
 
-        expect(authorRepository.findAll).toHaveBeenCalledTimes(1)
-        expect(result).toEqual(mockAuthors)
-    })
+    const result = await authorService.getAuthorById("1")
 
-    it('should get author by ID', async () => {
-        const mockAuthor = { id: "1", name: "James Clear" }
-
-        authorRepository.findById = jest.fn().mockResolvedValue(mockAuthor)
-
-        const result = await authorService.getAuthorById("1")
-
-        expect(authorRepository.findById).toHaveBeenCalledWith("1")
-        expect(result).toEqual(mockAuthor)
-    })
+    expect(authorRepository.findById).toHaveBeenCalledWith("1")
+    expect(result).toEqual(mockAuthor)
 })
