@@ -6,9 +6,21 @@ export const userCreationSchema = Joi.object({
 })
 
 export const userUpdateSchema = Joi.object({
-    password: Joi.string().min(8).required(),
+    password: Joi.string()
+        .min(8)
+        .required()
+        .messages({
+            'string.min': 'Password length must be at least 8 characters long',
+            'any.required': 'Password is required',
+        }),
 })
 
 export const userIdSchema = Joi.object({
-    id: Joi.string().uuid({ version: 'uuidv4' }).required().error(new Error("User ID is required")),
+    id: Joi.string()
+            .uuid({ version: 'uuidv4' })
+            .required()
+            .messages({
+                'any.required': 'User ID is required',
+                'string.guid': 'User ID must be a valid UUID',
+            })
 })
