@@ -6,22 +6,47 @@ export const authorSchema = Joi.object().keys({
     country: Joi.string(),
 }).or('id', 'name')
 
+export const publicationYearSchema = Joi.number()
+    .integer()
+    .positive()
+    .min(1900)
+    .max(new Date().getFullYear())
+    .messages({
+        'number.positive': 'Publication year must be a positive number',
+        'number.min': 'Publication year must be a valid year (greater than or equal to 1900)',
+        'number.max': 'Publication year cannot be in the future',
+        'any.required': 'Publication year is required'
+    })
+
+export const priceSchema = Joi.number()
+    .precision(2)
+    .positive()
+    .error(new Error("Price must be a positive number with up to 2 decimal places"))
+
+export const descriptionSchema = Joi.string().allow(null, '')
+
 export const bookCreationSchema = Joi.object({
     title: Joi.string().required().error(new Error("Title is required")),
-    publicationYear: Joi.number().integer().positive(),
-    author: authorSchema.required().error(new Error("Either author name or id is required")),
-    price: Joi.number().precision(2).positive().required().error(new Error("Price must be a positive number with up to 2 decimal places")),
-    description: Joi.string().allow(null, '').optional(),
+    publicationYear: publicationYearSchema,
+    author: authorSchema.required().error(new Error("Either author name or ID is required")),
+    price: priceSchema.required(),
+    description: descriptionSchema,
 })
 
 export const bookUpdateSchema = Joi.object({
     title: Joi.string(),
-    publicationYear: Joi.number().integer().positive(),
+    publicationYear: publicationYearSchema,
     author: authorSchema.optional(),
-    price: Joi.number().precision(2).positive(),
-    description: Joi.string().allow(null, '').optional(),
+    price: priceSchema,
+    description: descriptionSchema
 })
 
 export const bookIdSchema = Joi.object({
-    id: Joi.string().uuid({ version: 'uuidv4' }).required().error(new Error("Book ID is required")),
+    id: Joi.string()
+        .uuid({ version: 'uuidv4' })
+        .required()
+        .messages({
+            'any.required': 'Book ID is required',
+            'string.guid': 'Book ID must be a valid UUID',
+        })
 })
